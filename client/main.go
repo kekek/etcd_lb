@@ -27,7 +27,6 @@ import (
 
 	"google.golang.org/grpc"
 	ecpb "google.golang.org/grpc/examples/features/proto/echo"
-	"google.golang.org/grpc/resolver"
 )
 
 const (
@@ -36,6 +35,9 @@ const (
 )
 
 var addrs = []string{"localhost:50051", "localhost:50052"}
+
+var etcdAddrs = "0.0.0.0:2379,0.0.0.0:2479,0.0.0.0:2579"
+
 
 func callUnaryEcho(c ecpb.EchoClient, message string) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -56,7 +58,9 @@ func makeRPCs(cc *grpc.ClientConn, n int) {
 
 func main() {
 	pickfirstConn, err := grpc.Dial(
-		fmt.Sprintf("%s:///%s", exampleScheme, exampleServiceName),
+		fmt.Sprintf("etcdv3://test/%s", etcdAddrs),
+
+		//fmt.Sprintf("%s:///%s", exampleScheme, exampleServiceName),
 		// grpc.WithBalancerName("pick_first"), // "pick_first" is the default, so this DialOption is not necessary.
 		grpc.WithInsecure(),
 	)
@@ -88,7 +92,7 @@ func main() {
 // Following is an example name resolver implementation. Read the name
 // resolution example to learn more about it.
 
-type exampleResolverBuilder struct{}
+/*type exampleResolverBuilder struct{}
 
 func (*exampleResolverBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOption) (resolver.Resolver, error) {
 	r := &exampleResolver{
@@ -123,3 +127,4 @@ func (*exampleResolver) Close()                                 {}
 func init() {
 	resolver.Register(&exampleResolverBuilder{})
 }
+*/
