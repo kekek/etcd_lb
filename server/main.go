@@ -35,7 +35,7 @@ import (
 )
 
 var (
-	addrs = []string{":50051", ":50052"}
+	addrs     = []string{":50051", ":50052"}
 	etcdAddrs = "0.0.0.0:2379,0.0.0.0:2479,0.0.0.0:2579"
 )
 
@@ -44,15 +44,23 @@ type ecServer struct {
 }
 
 func (s *ecServer) UnaryEcho(ctx context.Context, req *ecpb.EchoRequest) (*ecpb.EchoResponse, error) {
+	log.Printf("UnaryEcho reciver request %s\n", s.addr)
+
 	return &ecpb.EchoResponse{Message: fmt.Sprintf("%s (from %s)", req.Message, s.addr)}, nil
 }
 func (s *ecServer) ServerStreamingEcho(*ecpb.EchoRequest, ecpb.Echo_ServerStreamingEchoServer) error {
+	log.Printf("ServerStreamingEcho reciver request %s\n", s.addr)
+
 	return status.Errorf(codes.Unimplemented, "not implemented")
 }
 func (s *ecServer) ClientStreamingEcho(ecpb.Echo_ClientStreamingEchoServer) error {
+	log.Printf("ClientStreamingEcho reciver request %s\n", s.addr)
+
 	return status.Errorf(codes.Unimplemented, "not implemented")
 }
 func (s *ecServer) BidirectionalStreamingEcho(ecpb.Echo_BidirectionalStreamingEchoServer) error {
+	log.Printf("BidirectionalStreamingEcho reciver request %s\n", s.addr)
+
 	return status.Errorf(codes.Unimplemented, "not implemented")
 }
 
@@ -64,6 +72,7 @@ func startServer(addr string) {
 	s := grpc.NewServer()
 	ecpb.RegisterEchoServer(s, &ecServer{addr: addr})
 
+	// resolver register
 	register, err := resolver.NewRegister("test", addr, strings.Split(etcdAddrs, ","))
 	if err != nil {
 		log.Fatalln(err)
