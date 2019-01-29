@@ -26,7 +26,10 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
 	ecpb "google.golang.org/grpc/examples/features/proto/echo"
+
+	_ "github.com/weisd/etcdv3-resolver"
 )
 
 const (
@@ -62,6 +65,7 @@ func main() {
 
 		//fmt.Sprintf("%s:///%s", exampleScheme, exampleServiceName),
 		// grpc.WithBalancerName("pick_first"), // "pick_first" is the default, so this DialOption is not necessary.
+		grpc.WithBalancerName(roundrobin.Name),
 		grpc.WithInsecure(),
 	)
 	if err != nil {
@@ -76,7 +80,9 @@ func main() {
 
 	// Make another ClientConn with round_robin policy.
 	roundrobinConn, err := grpc.Dial(
-		fmt.Sprintf("%s:///%s", exampleScheme, exampleServiceName),
+		//fmt.Sprintf("%s:///%s", exampleScheme, exampleServiceName),
+		fmt.Sprintf("etcdv3://test/%s", etcdAddrs),
+
 		grpc.WithBalancerName("round_robin"), // This sets the initial balancing policy.
 		grpc.WithInsecure(),
 	)

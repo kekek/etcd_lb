@@ -22,6 +22,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/weisd/etcdv3-resolver"
 	"log"
 	"net"
 	"strings"
@@ -31,9 +32,6 @@ import (
 	"google.golang.org/grpc/codes"
 	ecpb "google.golang.org/grpc/examples/features/proto/echo"
 	"google.golang.org/grpc/status"
-
-	// etcd 注册
-	"github.com/weisd/etcdv3-resolver"
 )
 
 var (
@@ -66,11 +64,6 @@ func startServer(addr string) {
 	s := grpc.NewServer()
 	ecpb.RegisterEchoServer(s, &ecServer{addr: addr})
 
-	log.Printf("serving on %s\n", addr)
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-
 	register, err := resolver.NewRegister("test", addr, strings.Split(etcdAddrs, ","))
 	if err != nil {
 		log.Fatalln(err)
@@ -79,6 +72,11 @@ func startServer(addr string) {
 	ctx, _ := context.WithCancel(context.Background())
 
 	register.AutoRegisteWithExpire(ctx, 5)
+
+	log.Printf("serving on %s\n", addr)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }
 
 func main() {
